@@ -72,7 +72,7 @@ styles = {"bar", "series"}
 
 def main():
     arguments_parser = argparse.ArgumentParser(
-        description="Convert .lyx file to .html files.")
+        description="Convert .lyx files to .html files.")
     arguments_parser.add_argument("input_file",
                                   type=str,
                                   help="path to a valid .lyx file")

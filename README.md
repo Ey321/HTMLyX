@@ -13,7 +13,7 @@
 ```
 usage: python main.py [-h] input_file output_file
 
-Convert .lyx file to .html files.
+Convert .lyx files to .html files.
 
 positional arguments:
   input_file   path to a valid .lyx file

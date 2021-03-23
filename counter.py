@@ -180,33 +180,3 @@ def lowercase_roman(number):
 
 def uppercase_roman(number):
     return lowercase_roman(number).upper()
-
-
-if __name__ == "__main__":
-    print(split_first_command("<span>\\partname</span>"))
-    c = Counter()
-    print(c.evaluate("<span>\\partname  \\thesection</span>"))
-
-    c.increase_counter("subsection")
-    print(c.evaluate('\\thesubsection'))
-    c.increase_counter("section")
-    print(c.evaluate('\\thesection'))
-    c.increase_counter("subsection")
-    print(c.evaluate('\\thesubsection'))
-    c.increase_counter("part")
-    print(c.evaluate("\\thepart"))
-    c.increase_counter("section")
-    print(c.evaluate('\\thesection'))
-    c.increase_counter("subsection")
-    print(c.evaluate('\\thesubsection'))
-    c.increase_counter("subsection")
-    print(c.evaluate('\\thesubsection'))
-    c.increase_counter("part")
-    print(c.evaluate("\\thepart"))
-    c.increase_counter("section")
-    print(c.evaluate('\\thesection'))
-    c.increase_counter("subsection")
-    print(c.evaluate('\\thesubsection'))
-    c.increase_counter("subsection")
-    print(c.evaluate('\\thesubsection'))
-
