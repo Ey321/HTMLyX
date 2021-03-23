@@ -4,13 +4,25 @@ from parser import Parser
 
 TITLE_LAYOUT = "Title"
 PART_LAYOUT = "Part"
+SECTION_LAYOUT = "Section"
+SUBSECTION_LAYOUT = "Subsection"
+SUBSUBSECTION_LAYOUT = "Subsubsection"
+PARAGRAPH_LAYOUT = "Paragraph"
+SUBPARAGRAPH_LAYOUT = "Subparagraph"
 STANDARD_LAYOUT = "Standard"
 
-TEXT_LAYOUTS = {TITLE_LAYOUT, PART_LAYOUT, STANDARD_LAYOUT}
+TEXT_LAYOUTS = {TITLE_LAYOUT, PART_LAYOUT, SECTION_LAYOUT, SUBSECTION_LAYOUT,
+                SUBSUBSECTION_LAYOUT, PARAGRAPH_LAYOUT, SUBPARAGRAPH_LAYOUT,
+                STANDARD_LAYOUT}
 
 LAYOUT_TAGS = {
     TITLE_LAYOUT: 'h1 class="title"',
     PART_LAYOUT: 'h2 class="part"',
+    SECTION_LAYOUT: 'h3 class="section"',
+    SUBSECTION_LAYOUT: 'h4 class="subsection"',
+    SUBSUBSECTION_LAYOUT: 'h5 class="subsubsection"',
+    PARAGRAPH_LAYOUT: 'h6 class="paragraph"',
+    SUBPARAGRAPH_LAYOUT: 'h6 class="subparagraph"',
     STANDARD_LAYOUT: 'div class="standard"'
 }
 
