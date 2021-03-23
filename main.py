@@ -3,6 +3,7 @@ import sys
 from parser import Parser
 from output_document import OutputDocument
 
+BEGIN_DEEPER = "\\begin_deeper"
 TITLE_LAYOUT = "Title"
 PART_LAYOUT = "Part"
 SECTION_LAYOUT = "Section"
@@ -11,7 +12,7 @@ SUBSUBSECTION_LAYOUT = "Subsubsection"
 PARAGRAPH_LAYOUT = "Paragraph"
 SUBPARAGRAPH_LAYOUT = "Subparagraph"
 STANDARD_LAYOUT = "Standard"
-
+AUTHOR_LAYOUT = "Author"
 UNNUMBERED_TITLE_LAYOUT = "Title*"
 UNNUMBERED_PART_LAYOUT = "Part*"
 UNNUMBERED_SECTION_LAYOUT = "Section*"
@@ -19,18 +20,22 @@ UNNUMBERED_SUBSECTION_LAYOUT = "Subsection*"
 UNNUMBERED_SUBSUBSECTION_LAYOUT = "Subsubsection*"
 UNNUMBERED_PARAGRAPH_LAYOUT = "Paragraph*"
 UNNUMBERED_SUBPARAGRAPH_LAYOUT = "Subparagraph*"
+DATE_LAYOUT = "Date"
+LYX_CODE_LAYOUT = "LyX-Code"
+INDENT = '< p style = "margin-left:replace; margin-right:5%;" >'
 
-
-TEXT_LAYOUTS = {TITLE_LAYOUT, PART_LAYOUT, SECTION_LAYOUT, SUBSECTION_LAYOUT,
+TEXT_LAYOUTS = {TITLE_LAYOUT, AUTHOR_LAYOUT, DATE_LAYOUT, PART_LAYOUT, SECTION_LAYOUT, SUBSECTION_LAYOUT,
                 SUBSUBSECTION_LAYOUT, PARAGRAPH_LAYOUT, SUBPARAGRAPH_LAYOUT,
                 UNNUMBERED_TITLE_LAYOUT, UNNUMBERED_PART_LAYOUT,
                 UNNUMBERED_SECTION_LAYOUT, UNNUMBERED_SUBSECTION_LAYOUT,
                 UNNUMBERED_SUBSUBSECTION_LAYOUT, UNNUMBERED_PARAGRAPH_LAYOUT,
                 UNNUMBERED_SUBPARAGRAPH_LAYOUT,
-                STANDARD_LAYOUT}
+                STANDARD_LAYOUT, LYX_CODE_LAYOUT
+                }
 
 LAYOUT_TAGS = {
     TITLE_LAYOUT: 'h1 class="title"',
+    AUTHOR_LAYOUT: 'h1 class="author"',
     PART_LAYOUT: 'h2 class="part"',
     UNNUMBERED_PART_LAYOUT: 'h2 class="part"',
     SECTION_LAYOUT: 'h3 class="section"',
@@ -43,9 +48,12 @@ LAYOUT_TAGS = {
     UNNUMBERED_PARAGRAPH_LAYOUT: 'h6 class="paragraph"',
     SUBPARAGRAPH_LAYOUT: 'h6 class="subparagraph"',
     UNNUMBERED_SUBPARAGRAPH_LAYOUT: 'h6 class="subparagraph"',
+    LYX_CODE_LAYOUT: 'h6 class="LyX-Code"',
     STANDARD_LAYOUT: 'div class="standard"'
 }
+BEGIN_TAGS = {
 
+}
 LAYOUT_NUMBERING = {
     PART_LAYOUT: r'<span style="display: block">\partname  \thepart</span>',
     SECTION_LAYOUT: r'<span>\thesection  </span>',
@@ -54,7 +62,13 @@ LAYOUT_NUMBERING = {
     PARAGRAPH_LAYOUT: "",
     SUBPARAGRAPH_LAYOUT: "",
 }
+explanation = """
+if end Deeper:
+    parser.currentIndent -= 5
+if deeper:
+    parser.currentIndent += 5
 
+"""
 ENUMERATE_LAYOUT = "Enumerate"
 ITEMIZE_LAYOUT = "Itemize"
 ITEM_TAG = "li"
@@ -135,6 +149,16 @@ def parse_body(parser, outfile):
     outfile.write('</div>\n')
     outfile.write("</body>\n")
 
+def parse_begin_deeper(parser, outfile):
+    """ parses begins such as begin_deeper.
+    TODO:
+        before every begin layout lyxcode, we need to add indentation with size of parser.currentIndent
+     """
+
+    assert parser.current_command == BEGIN_DEEPER
+    parser.current_indent += 5
+    outfile.write(INDENT.replace("replace", str(parser.current_indent)))
+
 
 def parse_begin_layout(parser, outfile):
     """parses a layout, from \\begin layout to \\end_layout."""
@@ -166,6 +190,8 @@ def parse_list_layout(parser, outfile):
     # TODO
 
 
+
+
 def parse_text(parser, outfile):
     """parses a text and its styles"""
     parser.advance()
@@ -194,6 +220,8 @@ def parse_text(parser, outfile):
                 paragraph_styles[parser.current_command()[1:]] = param
                 parser.advance()
                 style_changed = True
+            elif parser.current_command == BEGIN_DEEPER:
+                parse_begin_deeper(parser, outfile)
             else:
                 parser.advance()
     outfile.write('</span>')

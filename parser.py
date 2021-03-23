@@ -7,6 +7,7 @@ class Parser:
         self.current_line: Optional[str] = None
         self.next_line: Optional[str] = None
         self.update_next()
+        self.current_indent = 5
 
     def update_next(self):
         self.current_line = self.next_line
