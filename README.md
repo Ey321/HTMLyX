@@ -49,17 +49,17 @@ optional arguments:
   
   - [ ] Verbatim/Verbatim*
   
-  - [ ] Part/Part*
+  - [x] Part/Part*
   
-  - [ ] Section/Section*
+  - [x] Section/Section*
   
-  - [ ] Subsection/Subsection*
+  - [x] Subsection/Subsection*
   
-  - [ ] Subsubsection/Subsubsection*
+  - [x] Subsubsection/Subsubsection*
   
-  - [ ] Paragraph/Paragraph*
+  - [x] Paragraph/Paragraph*
   
-  - [ ] Subparagraph/Subparagraph*
+  - [x] Subparagraph/Subparagraph*
   
   - [x] Title
   

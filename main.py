@@ -1,6 +1,7 @@
 import argparse
 import sys
 from parser import Parser
+from output_document import OutputDocument
 
 TITLE_LAYOUT = "Title"
 PART_LAYOUT = "Part"
@@ -11,19 +12,47 @@ PARAGRAPH_LAYOUT = "Paragraph"
 SUBPARAGRAPH_LAYOUT = "Subparagraph"
 STANDARD_LAYOUT = "Standard"
 
+UNNUMBERED_TITLE_LAYOUT = "Title*"
+UNNUMBERED_PART_LAYOUT = "Part*"
+UNNUMBERED_SECTION_LAYOUT = "Section*"
+UNNUMBERED_SUBSECTION_LAYOUT = "Subsection*"
+UNNUMBERED_SUBSUBSECTION_LAYOUT = "Subsubsection*"
+UNNUMBERED_PARAGRAPH_LAYOUT = "Paragraph*"
+UNNUMBERED_SUBPARAGRAPH_LAYOUT = "Subparagraph*"
+
+
 TEXT_LAYOUTS = {TITLE_LAYOUT, PART_LAYOUT, SECTION_LAYOUT, SUBSECTION_LAYOUT,
                 SUBSUBSECTION_LAYOUT, PARAGRAPH_LAYOUT, SUBPARAGRAPH_LAYOUT,
+                UNNUMBERED_TITLE_LAYOUT, UNNUMBERED_PART_LAYOUT,
+                UNNUMBERED_SECTION_LAYOUT, UNNUMBERED_SUBSECTION_LAYOUT,
+                UNNUMBERED_SUBSUBSECTION_LAYOUT, UNNUMBERED_PARAGRAPH_LAYOUT,
+                UNNUMBERED_SUBPARAGRAPH_LAYOUT,
                 STANDARD_LAYOUT}
 
 LAYOUT_TAGS = {
     TITLE_LAYOUT: 'h1 class="title"',
     PART_LAYOUT: 'h2 class="part"',
+    UNNUMBERED_PART_LAYOUT: 'h2 class="part"',
     SECTION_LAYOUT: 'h3 class="section"',
+    UNNUMBERED_SECTION_LAYOUT: 'h3 class="section"',
     SUBSECTION_LAYOUT: 'h4 class="subsection"',
+    UNNUMBERED_SUBSECTION_LAYOUT: 'h4 class="subsection"',
     SUBSUBSECTION_LAYOUT: 'h5 class="subsubsection"',
+    UNNUMBERED_SUBSUBSECTION_LAYOUT: 'h5 class="subsubsection"',
     PARAGRAPH_LAYOUT: 'h6 class="paragraph"',
+    UNNUMBERED_PARAGRAPH_LAYOUT: 'h6 class="paragraph"',
     SUBPARAGRAPH_LAYOUT: 'h6 class="subparagraph"',
+    UNNUMBERED_SUBPARAGRAPH_LAYOUT: 'h6 class="subparagraph"',
     STANDARD_LAYOUT: 'div class="standard"'
+}
+
+LAYOUT_NUMBERING = {
+    PART_LAYOUT: r'<span style="display: block">\partname  \thepart</span>',
+    SECTION_LAYOUT: r'<span>\thesection  </span>',
+    SUBSECTION_LAYOUT: r'<span>\thesubsection  </span>',
+    SUBSUBSECTION_LAYOUT: r'<span>\thesubsubsection  </span>',
+    PARAGRAPH_LAYOUT: "",
+    SUBPARAGRAPH_LAYOUT: "",
 }
 
 ENUMERATE_LAYOUT = "Enumerate"
@@ -57,7 +86,7 @@ def main():
 
 
 def parse_file(infile_path, outfile_path):
-    outfile = open(outfile_path, "w")
+    outfile = OutputDocument(outfile_path)
     outfile.write("<!DOCTYPE html>")
     outfile.write("<html>\n")
     write_head(outfile)
@@ -121,6 +150,9 @@ def parse_text_layout(parser, outfile):
     """parses a text layout, from \\begin layout to \\end_layout."""
     layout_type = parser.current_parameters()[0]
     outfile.write(f"<{LAYOUT_TAGS[layout_type]}>")
+    if layout_type in LAYOUT_NUMBERING.keys():
+        outfile.counter.increase_counter(layout_type.lower())
+        outfile.write(outfile.counter.evaluate(LAYOUT_NUMBERING[layout_type]))
     parse_text(parser, outfile)
     assert parser.current_command() == "\\end_layout"
     outfile.write(f"</{LAYOUT_TAGS[layout_type].split()[0]}>\n")
