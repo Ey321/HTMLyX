@@ -39,7 +39,9 @@ optional arguments:
   
   - [x] Standard
   
-  - [ ] LyX-Code
+  - [X] LyX-Code.
+    **note**: *the separator which LyX adds after the LyX-Code is not currently
+    supported*
   
   - [ ] Quotation
   
@@ -131,4 +133,4 @@ optional arguments:
 
 ## License
 
-**HTMLyX** is released under the GNU GPL version 3.0. The license is can be found in `LICENSE`, but if for some reason it wasn't included with the code, you can find it [here](https://www.gnu.org/licenses/gpl-3.0.txt).
+**HTMLyX** is released under the GNU GPL version 3.0. The license can be found in `LICENSE`, but if for some reason it wasn't included with the code, you can find it [here](https://www.gnu.org/licenses/gpl-3.0.txt).

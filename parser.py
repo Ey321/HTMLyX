@@ -7,7 +7,6 @@ class Parser:
         self.current_line: Optional[str] = None
         self.next_line: Optional[str] = None
         self.update_next()
-        self.current_indent = 5
 
     def update_next(self):
         self.current_line = self.next_line
@@ -38,4 +37,14 @@ class Parser:
 
     def current_parameters(self):
         return self.current_line.split()[1:]
+
+    def next_command(self):
+        return self.next_line.split()[0]
+
+    def next_parameters(self):
+        return self.next_line.split()[1:]
+
+    def is_next_command(self):
+        return self.next_line.startswith("\\")
+
 

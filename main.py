@@ -24,13 +24,14 @@ DATE_LAYOUT = "Date"
 LYX_CODE_LAYOUT = "LyX-Code"
 INDENT = '< p style = "margin-left:replace; margin-right:5%;" >'
 
-TEXT_LAYOUTS = {TITLE_LAYOUT, AUTHOR_LAYOUT, DATE_LAYOUT, PART_LAYOUT, SECTION_LAYOUT, SUBSECTION_LAYOUT,
+TEXT_LAYOUTS = {TITLE_LAYOUT, AUTHOR_LAYOUT, DATE_LAYOUT, PART_LAYOUT,
+                SECTION_LAYOUT, SUBSECTION_LAYOUT,
                 SUBSUBSECTION_LAYOUT, PARAGRAPH_LAYOUT, SUBPARAGRAPH_LAYOUT,
                 UNNUMBERED_TITLE_LAYOUT, UNNUMBERED_PART_LAYOUT,
                 UNNUMBERED_SECTION_LAYOUT, UNNUMBERED_SUBSECTION_LAYOUT,
                 UNNUMBERED_SUBSUBSECTION_LAYOUT, UNNUMBERED_PARAGRAPH_LAYOUT,
                 UNNUMBERED_SUBPARAGRAPH_LAYOUT,
-                STANDARD_LAYOUT, LYX_CODE_LAYOUT
+                STANDARD_LAYOUT
                 }
 
 LAYOUT_TAGS = {
@@ -48,7 +49,6 @@ LAYOUT_TAGS = {
     UNNUMBERED_PARAGRAPH_LAYOUT: 'h6 class="paragraph"',
     SUBPARAGRAPH_LAYOUT: 'h6 class="subparagraph"',
     UNNUMBERED_SUBPARAGRAPH_LAYOUT: 'h6 class="subparagraph"',
-    LYX_CODE_LAYOUT: 'h6 class="LyX-Code"',
     STANDARD_LAYOUT: 'div class="standard"'
 }
 BEGIN_TAGS = {
@@ -125,6 +125,23 @@ def write_head(outfile):
 <script type='text/javascript' src="katex.min.js"></script>
 """
     )
+    outfile.write("""
+<style type="text/css">
+
+h1.title {
+    text-align: center;
+}
+
+div.lyx-code {
+  font-family: Menlo, Monaco, "Courier New", monospace;
+  background-color: #eaeaea;
+  padding: 20px;
+  border-radius: 15px;
+}
+
+</style>
+"""
+    )
     outfile.write('</head\n>')
 
 
@@ -149,16 +166,6 @@ def parse_body(parser, outfile):
     outfile.write('</div>\n')
     outfile.write("</body>\n")
 
-def parse_begin_deeper(parser, outfile):
-    """ parses begins such as begin_deeper.
-    TODO:
-        before every begin layout lyxcode, we need to add indentation with size of parser.currentIndent
-     """
-
-    assert parser.current_command == BEGIN_DEEPER
-    parser.current_indent += 5
-    outfile.write(INDENT.replace("replace", str(parser.current_indent)))
-
 
 def parse_begin_layout(parser, outfile):
     """parses a layout, from \\begin layout to \\end_layout."""
@@ -168,6 +175,47 @@ def parse_begin_layout(parser, outfile):
     layout_type = parameters[0]
     if layout_type in TEXT_LAYOUTS:
         parse_text_layout(parser, outfile)
+    elif layout_type == LYX_CODE_LAYOUT:
+        outfile.write('<div class="lyx-code">')
+        parse_lyx_code(parser, outfile)
+        outfile.write('</div>')
+
+
+def parse_lyx_code(parser, outfile, indent=0):
+    """ parses the lyx code"""
+    while True:
+        if parser.current_command() != "\\begin_layout" or \
+             parser.current_parameters()[0] != LYX_CODE_LAYOUT:
+            break
+        parser.advance()
+
+        if not parser.is_current_command():
+            outfile.write('<div>')
+            parse_text(parser, outfile, indent=indent)
+            outfile.write('</div>')
+
+        if parser.current_command() == "\\end_layout" and \
+                parser.next_command() == "\\begin_deeper":
+            assert parser.current_command() == "\\end_layout"
+            parser.advance()  # \end_layout
+            assert parser.current_command() == "\\begin_deeper"
+            parser.advance()  # \begin_deeper
+            parse_lyx_code(parser, outfile, indent=indent + 1)
+            assert parser.current_command() == "\\end_deeper"
+            parser.advance()  # \end_deeper
+
+        if parser.current_command() == "\\end_layout" and \
+                parser.next_command() == "\\begin_layout" and \
+                parser.next_parameters()[0] == LYX_CODE_LAYOUT:
+            assert parser.current_command() == "\\end_layout"
+            parser.advance()
+            assert parser.current_command() == "\\begin_layout"
+            continue
+        elif parser.current_command() == "\\end_layout":
+            parser.advance()
+            break
+        else:
+            pass
 
 
 def parse_text_layout(parser, outfile):
@@ -177,6 +225,7 @@ def parse_text_layout(parser, outfile):
     if layout_type in LAYOUT_NUMBERING.keys():
         outfile.counter.increase_counter(layout_type.lower())
         outfile.write(outfile.counter.evaluate(LAYOUT_NUMBERING[layout_type]))
+    parser.advance()
     parse_text(parser, outfile)
     assert parser.current_command() == "\\end_layout"
     outfile.write(f"</{LAYOUT_TAGS[layout_type].split()[0]}>\n")
@@ -190,11 +239,8 @@ def parse_list_layout(parser, outfile):
     # TODO
 
 
-
-
-def parse_text(parser, outfile):
+def parse_text(parser, outfile, indent=0):
     """parses a text and its styles"""
-    parser.advance()
 
     paragraph_styles = {
         "bar": "default",
@@ -202,6 +248,7 @@ def parse_text(parser, outfile):
     }
 
     outfile.write(f'<span style="{get_style(paragraph_styles)}">')
+    outfile.write("&emsp;"*indent)
     style_changed = False
     while not parser.is_current_command() or \
             parser.current_command() != "\\end_layout":
@@ -220,8 +267,6 @@ def parse_text(parser, outfile):
                 paragraph_styles[parser.current_command()[1:]] = param
                 parser.advance()
                 style_changed = True
-            elif parser.current_command == BEGIN_DEEPER:
-                parse_begin_deeper(parser, outfile)
             else:
                 parser.advance()
     outfile.write('</span>')
