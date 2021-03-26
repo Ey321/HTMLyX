@@ -139,6 +139,11 @@ div.lyx-code {
   border-radius: 15px;
 }
 
+hr.plain {
+  border: 1px dotted #AFAFAF;
+}
+
+
 </style>
 """
     )
@@ -248,7 +253,7 @@ def parse_text(parser, outfile, indent=0):
     }
 
     outfile.write(f'<span style="{get_style(paragraph_styles)}">')
-    outfile.write("&emsp;"*indent)
+    outfile.write("&nbsp;"*indent*4)
     style_changed = False
     while not parser.is_current_command() or \
             parser.current_command() != "\\end_layout":
@@ -304,6 +309,13 @@ def parse_inset(parser, outfile):
                 parser.advance()
             insert_big_formula(outfile, latex_code)
             parser.advance()
+    elif parser.current_parameters()[0] == "Separator":
+        if parser.current_parameters() == ["Separator", "plain"]:
+            outfile.write('<hr noshade class="plain">')
+            parser.advance()
+        else:
+            raise Exception(f"Unsupported separator type: "
+                            + str(parser.current_parameters()))
     assert parser.current_command() == "\\end_inset"
     parser.advance()
     return
