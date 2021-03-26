@@ -77,9 +77,9 @@ optional arguments:
   
   - [ ] Labeling
   
-  - [ ] Itemize
+  - [x] Itemize
   
-  - [ ] Enumerate
+  - [x] Enumerate
   
   - [ ] Description
 

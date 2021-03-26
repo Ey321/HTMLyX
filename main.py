@@ -76,6 +76,7 @@ LIST_TAG = {
     ENUMERATE_LAYOUT: "ol",
     ITEMIZE_LAYOUT: "ul"
 }
+ENUMERATE_TYPES = "1aiAI"
 
 LIST_LAYOUTS = {ENUMERATE_LAYOUT, ITEMIZE_LAYOUT}
 
@@ -184,6 +185,10 @@ def parse_begin_layout(parser, outfile):
         outfile.write('<div class="lyx-code">')
         parse_lyx_code(parser, outfile)
         outfile.write('</div>')
+    elif layout_type in LIST_LAYOUTS:
+        parse_list_layout(parser, outfile)
+    else:
+        raise Exception(f"Unsupported layout type in {parser.current_line[:-1]}")
 
 
 def parse_lyx_code(parser, outfile, indent=0):
@@ -237,11 +242,48 @@ def parse_text_layout(parser, outfile):
     parser.advance()
 
 
-def parse_list_layout(parser, outfile):
+def parse_list_layout(parser, outfile, level=0):
     """parses itemize and enumerate"""
-    outfile.write(f"<{LIST_TAG}>")
     layout_type = parser.current_parameters()[0]
-    # TODO
+    #outfile.write(f"<{LIST_TAG[layout_type]}>")
+    write_list_begin_tag(outfile, layout_type, level)
+    while parser.current_command() == "\\begin_layout" \
+            and parser.current_parameters()[0] in LIST_LAYOUTS:
+        # list type changed from enumerate to itemize or vice versa
+        if parser.current_parameters()[0] != layout_type:
+            outfile.write(f"</{LIST_TAG[layout_type]}>")
+            layout_type = parser.current_parameters()[0]
+            #outfile.write(f"<{LIST_TAG[layout_type]}>")
+            write_list_begin_tag(outfile, layout_type, level)
+        parse_list_item(parser, outfile, level=level)
+
+    outfile.write(f"</{LIST_TAG[layout_type]}>")
+
+
+def write_list_begin_tag(outfile, list_type, level):
+    print(level)
+    if list_type == ENUMERATE_LAYOUT:
+        outfile.write(f'<{LIST_TAG[ENUMERATE_LAYOUT]} type="{ENUMERATE_TYPES[level]}">')
+        print("here")
+        print(f'<{LIST_TAG[ENUMERATE_LAYOUT]} type="{ENUMERATE_TYPES[level]}">')
+    else:
+        outfile.write(f"<{LIST_TAG[ITEMIZE_LAYOUT]}>")
+
+
+def parse_list_item(parser, outfile, level=0):
+    assert parser.current_command() == "\\begin_layout" \
+        and parser.current_parameters()[0] in LIST_LAYOUTS
+    outfile.write(f"<{ITEM_TAG}>")
+    parser.advance()
+    parse_text(parser, outfile)
+    assert parser.current_command() == "\\end_layout"
+    parser.advance()
+    if parser.current_command() == "\\begin_deeper":
+        parser.advance()
+        parse_list_layout(parser, outfile, level=level+1)
+        assert parser.current_command() == "\\end_deeper"
+        parser.advance()
+    outfile.write(f"</{ITEM_TAG}>")
 
 
 def parse_text(parser, outfile, indent=0):
