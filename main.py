@@ -245,7 +245,6 @@ def parse_text_layout(parser, outfile):
 def parse_list_layout(parser, outfile, level=0):
     """parses itemize and enumerate"""
     layout_type = parser.current_parameters()[0]
-    #outfile.write(f"<{LIST_TAG[layout_type]}>")
     write_list_begin_tag(outfile, layout_type, level)
     while parser.current_command() == "\\begin_layout" \
             and parser.current_parameters()[0] in LIST_LAYOUTS:
@@ -253,7 +252,6 @@ def parse_list_layout(parser, outfile, level=0):
         if parser.current_parameters()[0] != layout_type:
             outfile.write(f"</{LIST_TAG[layout_type]}>")
             layout_type = parser.current_parameters()[0]
-            #outfile.write(f"<{LIST_TAG[layout_type]}>")
             write_list_begin_tag(outfile, layout_type, level)
         parse_list_item(parser, outfile, level=level)
 
@@ -261,11 +259,8 @@ def parse_list_layout(parser, outfile, level=0):
 
 
 def write_list_begin_tag(outfile, list_type, level):
-    print(level)
     if list_type == ENUMERATE_LAYOUT:
         outfile.write(f'<{LIST_TAG[ENUMERATE_LAYOUT]} type="{ENUMERATE_TYPES[level]}">')
-        print("here")
-        print(f'<{LIST_TAG[ENUMERATE_LAYOUT]} type="{ENUMERATE_TYPES[level]}">')
     else:
         outfile.write(f"<{LIST_TAG[ITEMIZE_LAYOUT]}>")
 
@@ -358,6 +353,10 @@ def parse_inset(parser, outfile):
         else:
             raise Exception(f"Unsupported separator type: "
                             + str(parser.current_parameters()))
+    elif parser.current_parameters()[0] == "Newline":
+        if parser.current_parameters() == ["Newline", "newline"]:
+            parser.advance()
+            outfile.write("<br/>")
     assert parser.current_command() == "\\end_inset"
     parser.advance()
     return
