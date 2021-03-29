@@ -70,7 +70,10 @@ ENUMERATE_TYPES = "1aiAI"
 
 LIST_LAYOUTS = {ENUMERATE_LAYOUT, ITEMIZE_LAYOUT}
 
-styles = {"bar", "series", "color"}
+styles = {"bar", "uuline", "uwave",
+          "series",
+          "color",
+          "strikeout"}
 VALID_COLORS = {
     "inherit",
     "default",
@@ -209,8 +212,11 @@ def parse_text(parser, outfile, indent=0):
 
     paragraph_styles = {
         "bar": "default",
+        "uuline": "default",
+        "uwave": "default",
         "series": "default",
-        "color": "default"
+        "color": "default",
+        "strikeout": "default",
     }
 
     outfile.write(f'<span style="{get_style(paragraph_styles)}">')
@@ -242,13 +248,19 @@ def get_style(style_dict):
     out = ""
     if style_dict["bar"] == "under":
         out += 'text-decoration: underline; '
-    elif style_dict["bar"] == "no":
-        out += 'text-decoration: none;'
+    if style_dict["uuline"] == "on":
+        out += 'text-decoration-line: underline; text-decoration-style: double; '
+    if style_dict["uwave"] == "on":
+        out += 'text-decoration-line: underline; text-decoration-style: wavy; '
 
     if style_dict["series"] == "medium":
         out += 'font-weight: normal; '
     elif style_dict["series"] == "bold":
         out += 'font-weight: bold; '
+
+    if style_dict["strikeout"] == "on":
+        out += 'text-decoration: line-through; '
+
 
     if style_dict["color"] in VALID_COLORS:
         out += f'color: {style_dict["color"]}; '
