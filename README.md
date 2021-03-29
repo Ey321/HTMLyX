@@ -91,7 +91,7 @@ optional arguments:
   
   - [ ] Size
   
-  - [ ] Color
+  - [x] Color
   
   - [ ] Underlining
   

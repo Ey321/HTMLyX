@@ -70,7 +70,30 @@ ENUMERATE_TYPES = "1aiAI"
 
 LIST_LAYOUTS = {ENUMERATE_LAYOUT, ITEMIZE_LAYOUT}
 
-styles = {"bar", "series"}
+styles = {"bar", "series", "color"}
+VALID_COLORS = {
+    "inherit",
+    "default",
+    "black",
+    "blue",
+    "brown",
+    "cyan",
+    "darkgray",
+    "gray",
+    "green",
+    "lightgray",
+    "lime",
+    "magenta",
+    "olive",
+    "orange",
+    "pink",
+    "purple",
+    "red",
+    "teal",
+    "violet",
+    "white",
+    "yellow"
+}
 
 
 def parse_begin_layout(parser, outfile):
@@ -186,7 +209,8 @@ def parse_text(parser, outfile, indent=0):
 
     paragraph_styles = {
         "bar": "default",
-        "series": "default"
+        "series": "default",
+        "color": "default"
     }
 
     outfile.write(f'<span style="{get_style(paragraph_styles)}">')
@@ -225,4 +249,7 @@ def get_style(style_dict):
         out += 'font-weight: normal; '
     elif style_dict["series"] == "bold":
         out += 'font-weight: bold; '
+
+    if style_dict["color"] in VALID_COLORS:
+        out += f'color: {style_dict["color"]}; '
     return out
