@@ -1,5 +1,5 @@
 def split_first_command(line):
-    separating_characters = "\\.<>"
+    separating_characters = "\\.<>:"
     first_space = first_sep_char = len(line)
     if " " in line:
         first_space = line.index(" ")
@@ -26,6 +26,10 @@ class Counter:
     PARAGRAPH_FORMAT = r""
     SUBPARAGRAPH_FORMAT = r""
 
+    CAPTION_FORMAT = r"\captionname  \arabic\c@caption: "
+    FIGURE_FORMAT = r"\figurename  \arabic\c@figure: "
+    ALGORITHM_FORMAT = r"\algorithmname  \arabic\c@algorithm: "
+
     def __init__(self):
         self.COUNTER_VALUES = {
             "\\c@part": 0,
@@ -33,7 +37,11 @@ class Counter:
             "\\c@subsection": 0,
             "\\c@subsubsection": 0,
             "\\c@paragraph": 0,
-            "\\c@subparagraph": 0
+            "\\c@subparagraph": 0,
+
+            "\\c@figure": 0,
+            "\\c@caption": 0,
+            "\\c@algorithm": 0
         }
         self.COMMANDS = {
             "\\arabic\\c": self.evaluate_arabic,
@@ -45,11 +53,18 @@ class Counter:
             "\\thesubsection": self.the_subsection,
             "\\thesubsubsection": self.the_subsubsection,
             "\\theparagraph": self.the_paragraph,
-            "\\thesubparagraph": self.the_subparagraph
+            "\\thesubparagraph": self.the_subparagraph,
+
+            "\\thecaption": self.the_caption,
+            "\\thefigure": self.the_figure,
+            "\\thealgorithm": self.the_algorithm
         }
 
         self.CONSTANTS = {
-            "\\partname": "חלק"
+            "\\partname": "חלק",
+            "\\captionname": "כיתוב",
+            "\\figurename": "איור",
+            "\\algorithmname": "אלגוריתם"
         }
 
         for key in self.CONSTANTS.keys():
@@ -60,10 +75,11 @@ class Counter:
         if not counter_name.startswith("\\c@"):
             counter_name = "\\c@" + counter_name
         self.COUNTER_VALUES[counter_name] += 1
-        index = self.HIERARCHY.index(counter_name[3:])
-        if index != 0:  # increasing part does not reset other values
-            for i in range(index+1, len(self.HIERARCHY)):
-                self.COUNTER_VALUES["\\c@" + self.HIERARCHY[i]] = 0
+        if counter_name in self.HIERARCHY:
+            index = self.HIERARCHY.index(counter_name[3:])
+            if index != 0:  # increasing part does not reset other values
+                for i in range(index+1, len(self.HIERARCHY)):
+                    self.COUNTER_VALUES["\\c@" + self.HIERARCHY[i]] = 0
 
     def evaluate(self, number_format):
         if "\\" not in number_format:
@@ -126,6 +142,18 @@ class Counter:
 
     def the_subparagraph(self, number_format):
         return self.evaluate_the_commands(self.SUBPARAGRAPH_FORMAT,
+                                          number_format)
+
+    def the_caption(self, number_format):
+        return self.evaluate_the_commands(self.CAPTION_FORMAT,
+                                          number_format)
+
+    def the_figure(self, number_format):
+        return self.evaluate_the_commands(self.FIGURE_FORMAT,
+                                          number_format)
+
+    def the_algorithm(self, number_format):
+        return self.evaluate_the_commands(self.ALGORITHM_FORMAT,
                                           number_format)
 
 

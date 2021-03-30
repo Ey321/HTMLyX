@@ -2,7 +2,7 @@ import argparse
 import sys
 from parser import Parser
 from output_document import OutputDocument
-from layouts import parse_begin_layout
+import layouts
 
 
 def main():
@@ -83,13 +83,16 @@ def parse_body(parser, outfile):
         '<div dir="auto" style="min-width: 200px; max-width: 960px;'
         'margin: 0 auto;">\n')
     parser.advance()
-    while parser.current_command() != "\\end_body":
-        if parser.current_command() == "\\begin_layout":
-            parse_begin_layout(parser, outfile)
+    parse_multiple_text_layouts(parser, outfile)
     assert parser.current() == "\\end_body\n"
     parser.advance()
     outfile.write('</div>\n')
     outfile.write("</body>\n")
+
+
+def parse_multiple_text_layouts(parser, outfile):
+    while parser.current_command() == "\\begin_layout":
+        layouts.parse_begin_layout(parser, outfile)
 
 
 if __name__ == "__main__":

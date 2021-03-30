@@ -1,4 +1,13 @@
-katex_elements_count = 0
+import floats
+import layouts
+import output_document
+
+BODY_TYPE_TO_CAPTION_COUNTER = {
+    output_document.NORMAL_BODY: ("\\c@caption", "\\thecaption"),
+    output_document.FLOATING_FIGURE_BODY: ("\\c@figure", "\\thefigure"),
+    output_document.FLOATING_ALGORITHM_BODY: ("\\c@algorithm",
+                                              "\\thealgorithm")
+}
 
 
 def parse_inset(parser, outfile):
@@ -19,6 +28,9 @@ def parse_inset(parser, outfile):
                 parser.advance()
             insert_big_formula(outfile, latex_code)
             parser.advance()
+    elif parser.current_parameters()[0] == "Float":
+        floats.parse_float(parser, outfile)
+        return
     elif parser.current_parameters()[0] == "Separator":
         if parser.current_parameters() == ["Separator", "plain"]:
             outfile.write('<hr noshade class="plain">')
@@ -30,6 +42,19 @@ def parse_inset(parser, outfile):
         if parser.current_parameters() == ["Newline", "newline"]:
             parser.advance()
             outfile.write("<br/>")
+    elif parser.current_parameters()[0] == "Caption":
+        if parser.current_parameters() == ["Caption", "Standard"]:
+            outfile.write('<div class="caption" style="text-align: center;">')
+            counter_name, caption_format = BODY_TYPE_TO_CAPTION_COUNTER[
+                outfile.current_body]
+            outfile.counter.increase_counter(counter_name)
+            outfile.write(outfile.counter.evaluate(caption_format))
+            parser.advance()  # \begin_inset Caption Standard
+            parser.advance()  # \begin_layout Plain Layout
+            layouts.parse_text(parser, outfile)
+            parser.advance()  # \end_layout
+            outfile.write("</div>")
+
     assert parser.current_command() == "\\end_inset"
     parser.advance()
     return

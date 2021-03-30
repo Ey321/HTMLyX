@@ -113,7 +113,7 @@ optional arguments:
 
 - [ ] Images
 
-- [ ] Floating figures, algorithms and tables
+- [x] Floating figures, algorithms and tables
 
 - [ ] Table of contents, table of algorithms
 

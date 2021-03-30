@@ -1,4 +1,4 @@
-from insets import parse_inset
+import insets
 
 BEGIN_DEEPER = "\\begin_deeper"
 TITLE_LAYOUT = "Title"
@@ -19,6 +19,7 @@ UNNUMBERED_PARAGRAPH_LAYOUT = "Paragraph*"
 UNNUMBERED_SUBPARAGRAPH_LAYOUT = "Subparagraph*"
 DATE_LAYOUT = "Date"
 LYX_CODE_LAYOUT = "LyX-Code"
+PLAIN_LAYOUT = "Plain Layout"
 
 TEXT_LAYOUTS = {TITLE_LAYOUT, AUTHOR_LAYOUT, DATE_LAYOUT, PART_LAYOUT,
                 SECTION_LAYOUT, SUBSECTION_LAYOUT,
@@ -27,7 +28,8 @@ TEXT_LAYOUTS = {TITLE_LAYOUT, AUTHOR_LAYOUT, DATE_LAYOUT, PART_LAYOUT,
                 UNNUMBERED_SECTION_LAYOUT, UNNUMBERED_SUBSECTION_LAYOUT,
                 UNNUMBERED_SUBSUBSECTION_LAYOUT, UNNUMBERED_PARAGRAPH_LAYOUT,
                 UNNUMBERED_SUBPARAGRAPH_LAYOUT,
-                STANDARD_LAYOUT
+                STANDARD_LAYOUT,
+                PLAIN_LAYOUT
                 }
 
 LAYOUT_TAGS = {
@@ -45,7 +47,8 @@ LAYOUT_TAGS = {
     UNNUMBERED_PARAGRAPH_LAYOUT: 'h6 class="paragraph"',
     SUBPARAGRAPH_LAYOUT: 'h6 class="subparagraph"',
     UNNUMBERED_SUBPARAGRAPH_LAYOUT: 'h6 class="subparagraph"',
-    STANDARD_LAYOUT: 'div class="standard"'
+    STANDARD_LAYOUT: 'div class="standard"',
+    PLAIN_LAYOUT: 'div class="plain"'
 }
 BEGIN_TAGS = {
 
@@ -103,8 +106,8 @@ def parse_begin_layout(parser, outfile):
     """parses a layout, from \\begin layout to \\end_layout."""
     assert parser.current_command() == "\\begin_layout"
     parameters = parser.current_parameters()
-    assert len(parameters) == 1
-    layout_type = parameters[0]
+    assert len(parameters) >= 1
+    layout_type = " ".join(parameters)
     if layout_type in TEXT_LAYOUTS:
         parse_text_layout(parser, outfile)
     elif layout_type == LYX_CODE_LAYOUT:
@@ -156,7 +159,7 @@ def parse_lyx_code(parser, outfile, indent=0):
 
 def parse_text_layout(parser, outfile):
     """parses a text layout, from \\begin layout to \\end_layout."""
-    layout_type = parser.current_parameters()[0]
+    layout_type = " ".join(parser.current_parameters())
     outfile.write(f"<{LAYOUT_TAGS[layout_type]}>")
     if layout_type in LAYOUT_NUMBERING.keys():
         outfile.counter.increase_counter(layout_type.lower())
@@ -233,7 +236,7 @@ def parse_text(parser, outfile, indent=0):
             parser.advance()
         else:
             if parser.current_command() == "\\begin_inset":
-                parse_inset(parser, outfile)
+                insets.parse_inset(parser, outfile)
             elif parser.current_command()[1:] in styles:
                 param = parser.current_parameters()[0]
                 paragraph_styles[parser.current_command()[1:]] = param
