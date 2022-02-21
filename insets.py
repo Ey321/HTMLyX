@@ -30,13 +30,13 @@ def parse_inset(parser, outfile):
         elif len(parser.current_parameters()) == 1:  # non inline formula
             latex_code = ""
             parser.advance()
-            assert parser.current_command() == "\\["
-            parser.advance()
-            while parser.current_command() != "\\]":
+            while parser.current() != "\\end_inset\n":
                 latex_code += parser.current()
                 parser.advance()
+            # on non-inline formulas that are not align areas, the latex equation is surrounded by \[ \]
+            if latex_code.startswith("\\[") and latex_code.endswith("\\]\n"):
+                latex_code = latex_code[2:-3]
             insert_big_formula(outfile, latex_code)
-            parser.advance()
     elif parser.current_parameters()[0] == "Float":
         floats.parse_float(parser, outfile)
         return
@@ -109,7 +109,7 @@ def insert_image(parser, outfile, filename, width, height, scale):
 
     outfile.write(f'<img src="images/img{image_count}" ')
     if scale:
-        outfile.write(f'onload="this.width*={scale/100};this.onload=null;"')
+        outfile.write(f'onload="this.width*={scale / 100};this.onload=null;"')
 
     else:
         # TODO support all widths formats
@@ -132,8 +132,9 @@ def insert_image(parser, outfile, filename, width, height, scale):
     image_count += 1
 
 
-def insert_formula(outfile, latex_code):
-    html_code = subprocess.Popen(["node", "renderer/renderer.js", latex_code], stdout=subprocess.PIPE).stdout.read().decode()
+def insert_formula(outfile, latex_code, display_mode=False):
+    html_code = subprocess.Popen(["node", "renderer/renderer.js", latex_code, str(display_mode)],
+                                 stdout=subprocess.PIPE).stdout.read().decode()
     outfile.write(f"""
     <div class="viewport" style="display: inline-block; overflow: auto; 
     max-width: 80%; vertical-align: middle; margin-top: 0px;">
@@ -143,5 +144,5 @@ def insert_formula(outfile, latex_code):
 
 def insert_big_formula(outfile, latex_code):
     outfile.write('<div style="text-align: center;">')
-    insert_formula(outfile, latex_code[:-1])
+    insert_formula(outfile, latex_code[:-1], display_mode=True)
     outfile.write('</div>')
