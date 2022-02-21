@@ -4,6 +4,7 @@ from typing import *
 class Parser:
     def __init__(self, path_to_file):
         self.file = open(path_to_file)
+        self.file_path = path_to_file
         self.current_line: Optional[str] = None
         self.next_line: Optional[str] = None
         self.update_next()

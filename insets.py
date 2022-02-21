@@ -1,6 +1,12 @@
+import os.path
 import floats
 import layouts
 import output_document
+import shutil
+import pathlib
+import re
+
+image_count = 0
 
 BODY_TYPE_TO_CAPTION_COUNTER = {
     output_document.NORMAL_BODY: ("\\c@caption", "\\thecaption"),
@@ -9,6 +15,7 @@ BODY_TYPE_TO_CAPTION_COUNTER = {
                                               "\\thealgorithm")
 }
 
+PIXELS_IN_CM = 37.8
 
 def parse_inset(parser, outfile):
     """parses an inset"""
@@ -54,10 +61,74 @@ def parse_inset(parser, outfile):
             layouts.parse_text(parser, outfile)
             parser.advance()  # \end_layout
             outfile.write("</div>")
+    elif parser.current_parameters()[0] == "Graphics":
+        parse_graphics(parser, outfile)
 
     assert parser.current_command() == "\\end_inset"
     parser.advance()
     return
+
+
+def parse_graphics(parser, outfile):
+    assert parser.current_command() == "\\begin_inset"
+    assert parser.current_parameters() == ["Graphics"]
+    parser.advance()
+    filename = None
+    width = None
+    height = None
+    scale = None
+    while parser.current() != "\\end_inset\n":
+        line = parser.current().strip()
+        if line.startswith("filename "):
+            filename = line[9:]
+        elif line.startswith("width "):
+            width = line[6:]
+        elif line.startswith("scale "):
+            scale = int(line[6:])
+        parser.advance()
+    print(filename, width)
+
+    insert_image(parser, outfile, filename, width, height, scale)
+
+    assert parser.current_command() == "\\end_inset"
+
+
+def insert_image(parser, outfile, filename, width, height, scale):
+    global image_count
+    if os.path.isabs(filename):
+        img_path = pathlib.Path(filename)
+    else:
+        img_path = pathlib.Path(parser.file_path)
+        img_path = img_path.parent / filename
+
+    dest_path = pathlib.Path(outfile.file_path).parent / "images" / f"img{image_count}"
+    if not (dest_path.parent.exists()):
+        os.mkdir(dest_path.parent)
+    shutil.copy(img_path, dest_path)
+
+    outfile.write(f'<img src="images/img{image_count}" ')
+    if scale:
+        outfile.write(f'onload="this.width*={scale/100};this.onload=null;"')
+
+    else:
+        # TODO support all widths formats
+        if width:
+            # width is % of text width
+            if match := re.match(r"(?P<width>\d+)text%$", width):
+                outfile.write(f'width="{match["width"]}%"')
+            # width is given in pt
+            elif match := re.match(r"(?P<width>\d+)pt$", width):
+                outfile.write(f'width="{match["width"]}pt"')
+            # width is given in cm
+            elif match := re.match(r"(?P<width>\d+)cm$", width):
+                outfile.write(f'width="{int(match["width"]) * PIXELS_IN_CM}px"')
+
+        if height:
+            # TODO support height
+            print("Height is not yet supported!")
+
+    outfile.write("/>")
+    image_count += 1
 
 
 def insert_formula(outfile, latex_code):
