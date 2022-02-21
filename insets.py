@@ -8,6 +8,7 @@ import re
 import subprocess
 
 image_count = 0
+katex_macros = ""
 
 BODY_TYPE_TO_CAPTION_COUNTER = {
     output_document.NORMAL_BODY: ("\\c@caption", "\\thecaption"),
@@ -65,10 +66,23 @@ def parse_inset(parser, outfile):
             outfile.write("</div>")
     elif parser.current_parameters()[0] == "Graphics":
         parse_graphics(parser, outfile)
+    elif parser.current_parameters()[0] == "FormulaMacro":
+        parse_formula_macro(parser)
 
     assert parser.current_command() == "\\end_inset"
     parser.advance()
     return
+
+
+def parse_formula_macro(parser):
+    global katex_macros
+    assert parser.current_command() == "\\begin_inset"
+    assert parser.current_parameters() == ["FormulaMacro"]
+    parser.advance()
+
+    while parser.current() != "\\end_inset\n":
+        katex_macros += parser.current()
+        parser.advance()
 
 
 def parse_graphics(parser, outfile):
@@ -133,7 +147,7 @@ def insert_image(parser, outfile, filename, width, height, scale):
 
 
 def insert_formula(outfile, latex_code, display_mode=False):
-    html_code = subprocess.Popen(["node", "renderer/renderer.js", latex_code, str(display_mode)],
+    html_code = subprocess.Popen(["node", "renderer/renderer.js", katex_macros + " " + latex_code, str(display_mode)],
                                  stdout=subprocess.PIPE).stdout.read().decode()
     outfile.write(f"""
     <div class="viewport" style="display: inline-block; overflow: auto; 
