@@ -132,26 +132,6 @@ def insert_image(parser, outfile, filename, width, height, scale):
     image_count += 1
 
 
-'''
-def insert_formula(outfile, latex_code):
-    global katex_elements_count
-    ht = """
-<div class="viewport" style="display: inline-block; overflow: auto; 
-max-width: 80%; vertical-align: middle; margin-top: 0px;">
-<p id="ktx_count_{ktx_count}" dir="ltr"
-style="white-space: nowrap; overflow-x: auto; overflow-y: hidden; "/><script>
-katex.render("{latex_code}", document.getElementById('ktx_count_{ktx_count}'),{
-    throwOnError: false
-});
-</script></div>
-    """
-    ht = ht.replace("{ktx_count}", str(katex_elements_count))
-    # TODO replace the following line with a better escaping mechanism
-    ht = ht.replace("{latex_code}", latex_code.replace("\\", "\\\\"))
-    outfile.write(ht)
-    katex_elements_count += 1'''
-
-
 def insert_formula(outfile, latex_code):
     html_code = subprocess.Popen(["node", "renderer/renderer.js", latex_code], stdout=subprocess.PIPE).stdout.read().decode()
     outfile.write(f"""
