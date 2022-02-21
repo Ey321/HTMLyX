@@ -8,6 +8,7 @@ class Parser:
         self.current_line: Optional[str] = None
         self.next_line: Optional[str] = None
         self.update_next()
+        self.__line_idx = 0
 
     def update_next(self):
         self.current_line = self.next_line
@@ -23,6 +24,9 @@ class Parser:
         return self.next_line
 
     def advance(self):
+        self.__line_idx += 1
+        if self.__line_idx % 100 == 0:
+            print(self.__line_idx)
         n = self.next_line
         self.update_next()
         return n

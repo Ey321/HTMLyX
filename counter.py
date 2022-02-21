@@ -162,6 +162,7 @@ def arabic(number):
 
 
 _LOWERCASE_ROMAN_NUMBERS = {
+    0: "",
     1: "i",
     2: "ii",
     3: "iii",

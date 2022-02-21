@@ -1,11 +1,22 @@
 const katex = require('katex');
-function render_katex(){
-	var html = katex.renderToString(process.argv[2], {
-	    throwOnError: false,
-	    output: "html",
-	    displayMode: (process.argv[3]=="True")
+const readline = require('readline')
+
+var rl = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout,
+	terminal: false
+});
+
+
+rl.on('line', function(line){
+	const data = JSON.parse(line);
+
+	const html = katex.renderToString(data.equation, {
+		throwOnError: false,
+		output: "html",
+		displayMode: data.is_display
 	});
-	return html;
-}
- 
-console.log(render_katex());
+	const obj = new Object();
+	obj.html = html;
+	console.log(JSON.stringify(obj));
+})

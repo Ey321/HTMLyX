@@ -1,14 +1,18 @@
 import os.path
 import floats
-import layouts
+import main
 import output_document
 import shutil
 import pathlib
 import re
 import subprocess
+import layouts
+import katex_renderer
 
 image_count = 0
 katex_macros = ""
+
+EXISTING_MACROS = {"exp", "N", "S"}
 
 BODY_TYPE_TO_CAPTION_COUNTER = {
     output_document.NORMAL_BODY: ("\\c@caption", "\\thecaption"),
@@ -24,11 +28,7 @@ def parse_inset(parser, outfile):
     """parses an inset"""
     assert parser.current_command() == "\\begin_inset"
     if parser.current_parameters()[0] == "Formula":
-        if len(parser.current_parameters()) == 2:  # an inline formula
-            latex_code = parser.current_parameters()[1]
-            insert_formula(outfile, latex_code[1:-1])
-            parser.advance()
-        elif len(parser.current_parameters()) == 1:  # non inline formula
+        if len(parser.current_parameters()) == 1:  # non inline formula
             latex_code = ""
             parser.advance()
             while parser.current() != "\\end_inset\n":
@@ -38,6 +38,13 @@ def parse_inset(parser, outfile):
             if latex_code.startswith("\\[") and latex_code.endswith("\\]\n"):
                 latex_code = latex_code[2:-3]
             insert_big_formula(outfile, latex_code)
+        else:  # an inline formula
+            latex_code = " ".join(parser.current_parameters()[1:])
+            parser.advance()
+            while parser.current() != "\\end_inset\n":
+                latex_code += parser.current()
+                parser.advance()
+            insert_formula(outfile, latex_code.strip()[1:-1])
     elif parser.current_parameters()[0] == "Float":
         floats.parse_float(parser, outfile)
         return
@@ -68,6 +75,14 @@ def parse_inset(parser, outfile):
         parse_graphics(parser, outfile)
     elif parser.current_parameters()[0] == "FormulaMacro":
         parse_formula_macro(parser)
+    elif parser.current_parameters()[0] == "Foot":
+        # TODO actually handle foot, this is here just for the demo
+        parser.advance()
+        main.parse_multiple_text_layouts(parser, outfile)
+    else:
+        print(f"Unknown inset {parser.current().__repr__()}, skipping.")
+        while parser.current() != "\\end_inset\n":
+            parser.advance()
 
     assert parser.current_command() == "\\end_inset"
     parser.advance()
@@ -79,10 +94,18 @@ def parse_formula_macro(parser):
     assert parser.current_command() == "\\begin_inset"
     assert parser.current_parameters() == ["FormulaMacro"]
     parser.advance()
-
+    macro = parser.current()
+    parser.advance()
     while parser.current() != "\\end_inset\n":
-        katex_macros += parser.current()
+        # macro += parser.current()
         parser.advance()
+    match = re.match(r"\\(re)?newcommand\{\\(?P<macroname>.*?)}", macro)
+    assert match  # should match
+    print(match.groupdict()["macroname"])
+    if match.groupdict()["macroname"] in EXISTING_MACROS:
+        katex_macros += "\\re" + macro[len("\\"):]
+    else:
+        katex_macros += macro
 
 
 def parse_graphics(parser, outfile):
@@ -147,16 +170,16 @@ def insert_image(parser, outfile, filename, width, height, scale):
 
 
 def insert_formula(outfile, latex_code, display_mode=False):
-    html_code = subprocess.Popen(["node", "renderer/renderer.js", katex_macros + " " + latex_code, str(display_mode)],
-                                 stdout=subprocess.PIPE).stdout.read().decode()
-    outfile.write(f"""
-    <div class="viewport" style="display: inline-block; overflow: auto; 
-    max-width: 80%; vertical-align: middle; margin-top: 0px;">
-    <p dir="ltr"
-    style="white-space: nowrap; overflow-x: auto; overflow-y: hidden; ">{html_code}</p>""")
+    if not display_mode:
+        latex_code = "\\left. " + latex_code + "\\right."
+    html_code = katex_renderer.render_equation(katex_macros + latex_code, display_mode)
+    outfile.write(
+        f'<span dir="ltr" style="overflow-x: auto; overflow-y: hidden; display: inline-flex; max-width: 100%; \
+        white-space: nowrap; vertical-align: baseline;">{html_code}</span>')
 
 
 def insert_big_formula(outfile, latex_code):
-    outfile.write('<div style="text-align: center;">')
+    outfile.write('''<div style="text-align: center;display: inline-block; overflow-x: auto; overflow-y: hidden; 
+    max-width: 100%; vertical-align: middle; margin-top: 0px;">''')
     insert_formula(outfile, latex_code[:-1], display_mode=True)
     outfile.write('</div>')
