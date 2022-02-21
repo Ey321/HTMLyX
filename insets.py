@@ -154,9 +154,11 @@ katex.render("{latex_code}", document.getElementById('ktx_count_{ktx_count}'),{
 
 def insert_formula(outfile, latex_code):
     html_code = subprocess.Popen(["node", "renderer/renderer.js", latex_code], stdout=subprocess.PIPE).stdout.read().decode()
-    outfile.write('<span dir="ltr">')
-    outfile.write(html_code)
-    outfile.write("<span/>")
+    outfile.write(f"""
+    <div class="viewport" style="display: inline-block; overflow: auto; 
+    max-width: 80%; vertical-align: middle; margin-top: 0px;">
+    <p dir="ltr"
+    style="white-space: nowrap; overflow-x: auto; overflow-y: hidden; ">{html_code}</p>""")
 
 
 def insert_big_formula(outfile, latex_code):
