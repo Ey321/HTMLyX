@@ -5,6 +5,7 @@ import output_document
 import shutil
 import pathlib
 import re
+import subprocess
 
 image_count = 0
 
@@ -16,6 +17,7 @@ BODY_TYPE_TO_CAPTION_COUNTER = {
 }
 
 PIXELS_IN_CM = 37.8
+
 
 def parse_inset(parser, outfile):
     """parses an inset"""
@@ -86,7 +88,6 @@ def parse_graphics(parser, outfile):
         elif line.startswith("scale "):
             scale = int(line[6:])
         parser.advance()
-    print(filename, width)
 
     insert_image(parser, outfile, filename, width, height, scale)
 
@@ -131,6 +132,7 @@ def insert_image(parser, outfile, filename, width, height, scale):
     image_count += 1
 
 
+'''
 def insert_formula(outfile, latex_code):
     global katex_elements_count
     ht = """
@@ -147,7 +149,14 @@ katex.render("{latex_code}", document.getElementById('ktx_count_{ktx_count}'),{
     # TODO replace the following line with a better escaping mechanism
     ht = ht.replace("{latex_code}", latex_code.replace("\\", "\\\\"))
     outfile.write(ht)
-    katex_elements_count += 1
+    katex_elements_count += 1'''
+
+
+def insert_formula(outfile, latex_code):
+    html_code = subprocess.Popen(["node", "renderer/renderer.js", latex_code], stdout=subprocess.PIPE).stdout.read().decode()
+    outfile.write('<span dir="ltr">')
+    outfile.write(html_code)
+    outfile.write("<span/>")
 
 
 def insert_big_formula(outfile, latex_code):

@@ -40,10 +40,8 @@ def write_head(outfile):
                   'content="text/html;charset=UTF-8"/>\n')
     outfile.write(
         """
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css" integrity="sha384-MlJdn/WNKDGXveldHDdyRP1R4CTHr3FeuDNfhsLPYrq2t0UBkUdK2jyTnXPEK1NQ" crossorigin="anonymous">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="katex.min.css">
-<!-- The loading of KaTeX is deferred to speed up page rendering -->
-<script type='text/javascript' src="katex.min.js"></script>
 """
     )
     outfile.write("""
