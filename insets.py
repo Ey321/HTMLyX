@@ -173,13 +173,19 @@ def insert_formula(outfile, latex_code, display_mode=False):
     if not display_mode:
         latex_code = "\\left. " + latex_code + "\\right."
     html_code = katex_renderer.render_equation(katex_macros + latex_code, display_mode)
-    outfile.write(
-        f'<span dir="ltr" style="overflow-x: auto; overflow-y: hidden; display: inline-flex; max-width: 100%; \
-        white-space: nowrap; vertical-align: baseline;">{html_code}</span>')
+    if display_mode:
+        outfile.write(
+            f'<span dir="ltr" style="overflow-x: hidden; overflow-y: hidden; \
+            white-space: nowrap; vertical-align: baseline; width: max-content; display:inline-flex; justify-content: center;\
+            ">{html_code}</span>')
+    else:
+        outfile.write(
+            f'<span dir="ltr" style="overflow-x: auto; overflow-y: hidden; display: inline-flex; max-width: 100%; \
+            white-space: nowrap; vertical-align: baseline;">{html_code}</span>')
 
 
 def insert_big_formula(outfile, latex_code):
-    outfile.write('''<div style="text-align: center;display: inline-block; overflow-x: auto; overflow-y: hidden; 
-    max-width: 100%; vertical-align: middle; margin-top: 0px;">''')
+    outfile.write('''<div dir="ltr" style="text-align: center;display: inline-block; overflow-x: auto; overflow-y: hidden; 
+    max-width: 100%; vertical-align: middle; margin-top: 0px; width: 100%;">''')
     insert_formula(outfile, latex_code[:-1], display_mode=True)
     outfile.write('</div>')

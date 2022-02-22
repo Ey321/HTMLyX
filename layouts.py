@@ -10,6 +10,7 @@ PARAGRAPH_LAYOUT = "Paragraph"
 SUBPARAGRAPH_LAYOUT = "Subparagraph"
 STANDARD_LAYOUT = "Standard"
 AUTHOR_LAYOUT = "Author"
+DESCRIPTION = "Description"
 UNNUMBERED_TITLE_LAYOUT = "Title*"
 UNNUMBERED_PART_LAYOUT = "Part*"
 UNNUMBERED_SECTION_LAYOUT = "Section*"
@@ -29,7 +30,8 @@ TEXT_LAYOUTS = {TITLE_LAYOUT, AUTHOR_LAYOUT, DATE_LAYOUT, PART_LAYOUT,
                 UNNUMBERED_SUBSUBSECTION_LAYOUT, UNNUMBERED_PARAGRAPH_LAYOUT,
                 UNNUMBERED_SUBPARAGRAPH_LAYOUT,
                 STANDARD_LAYOUT,
-                PLAIN_LAYOUT
+                PLAIN_LAYOUT,
+                DESCRIPTION
                 }
 
 LAYOUT_TAGS = {
@@ -48,7 +50,8 @@ LAYOUT_TAGS = {
     SUBPARAGRAPH_LAYOUT: 'h6 class="subparagraph"',
     UNNUMBERED_SUBPARAGRAPH_LAYOUT: 'h6 class="subparagraph"',
     STANDARD_LAYOUT: 'div class="standard"',
-    PLAIN_LAYOUT: 'div class="plain"'
+    PLAIN_LAYOUT: 'div class="plain"',
+    DESCRIPTION: 'div class="description" style="font-weight: bold;"'
 }
 BEGIN_TAGS = {
 
@@ -102,6 +105,7 @@ VALID_COLORS = {
 }
 
 RTL_LANGUAGES = {"arabic", "hebrew"}
+
 
 def parse_begin_layout(parser, outfile):
     """parses a layout, from \\begin layout to \\end_layout."""

@@ -87,7 +87,7 @@ optional arguments:
   
   - [x] Enumerate
   
-  - [ ] Description
+  - [X] Description
 
 - [ ] All text formatting:
   
