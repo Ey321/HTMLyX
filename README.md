@@ -29,7 +29,7 @@ optional arguments:
 
 * Titles and *numbered* parts **only** (the numbers are not currently rendered)
 
-* Math insets
+* Math insets (inline, display mode and math macros)
 
 * Supported styles: **Series** (bold) and <u>bar</u> (underline)
 
@@ -97,21 +97,13 @@ optional arguments:
   
   - [ ] Strikethrough
 
-- [ ] Math
-  
-  - [x] Inline math
-  
-  - [x] Display mode math
-  
-  - [ ] Math macros
-
 - [ ] Boxes
 
 - [ ] Support ams-article layout types
 
 - [ ] Tables
 
-- [ ] Images
+- [ ] Images - not fully supported yet but can be inserted and scaled uniformly using scale%.
 
 - [x] Floating figures, algorithms and tables
 
@@ -127,9 +119,9 @@ optional arguments:
 
 ## Requirements
 
-1. [Python 3.X](https://www.python.org/)
+1. [Python 3.8+](https://www.python.org/)
 
-2. In order to view the outputed .html file with a browser, it must be located in the same directory with an installation of [KaTeX](https://github.com/KaTeX/KaTeX). The `.html` file should be placed inside the directory called `katex`.
+2. [NodeJS](https://nodejs.org) with [KaTeX](https://github.com/KaTeX/KaTeX) installed.
 
 ## License
 
