@@ -101,7 +101,6 @@ def parse_formula_macro(parser):
         parser.advance()
     match = re.match(r"\\(re)?newcommand\{\\(?P<macroname>.*?)}", macro)
     assert match  # should match
-    print(match.groupdict()["macroname"])
     if match.groupdict()["macroname"] in EXISTING_MACROS:
         katex_macros += "\\re" + macro[len("\\"):]
     else:
