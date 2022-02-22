@@ -3,6 +3,7 @@ import sys
 from parser import Parser
 from output_document import OutputDocument
 import layouts
+import insets
 
 
 def main():
@@ -20,6 +21,8 @@ def main():
         help="where to store the resulting .html file")
 
     arguments = arguments_parser.parse_args(sys.argv[1:])
+    parse_file(arguments.input_file, arguments.output_file, arguments.split)
+    insets.katex_macros = ""
     parse_file(arguments.input_file, arguments.output_file, arguments.split)
 
 
@@ -65,7 +68,7 @@ def parse_body(parser, outfile, split: bool):
     write_body_end(outfile)
 
 
-def parse_multiple_text_layouts(parser, outfile, split: bool):
+def parse_multiple_text_layouts(parser, outfile, split: bool = False):
     while parser.current_command() == "\\begin_layout":
         if parser.current_parameters()[0] == layouts.PART_LAYOUT and split:
             write_body_end(outfile)

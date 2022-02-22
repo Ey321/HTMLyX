@@ -16,6 +16,9 @@ class OutputDocument:
         self.current_body = NORMAL_BODY
         self.write_beginning()
 
+    def get_current_file_name(self):
+        return f"pt{self.current_pt}"
+
     def write_beginning(self):
         self.write("<!DOCTYPE html>")
         self.write("<html>\n")

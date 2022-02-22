@@ -14,6 +14,7 @@ FLOATS_BODIES = {
     ALGORITHM: output_document.FLOATING_ALGORITHM_BODY
 }
 
+
 def parse_float(parser, outfile):
     assert parser.current_command() == "\\begin_inset"
     assert parser.current_parameters()[0] == "Float"

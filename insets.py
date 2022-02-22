@@ -12,6 +12,8 @@ import katex_renderer
 image_count = 0
 katex_macros = ""
 
+hyperlink_targets = {}
+
 EXISTING_MACROS = {"exp", "N", "S"}
 
 BODY_TYPE_TO_CAPTION_COUNTER = {
@@ -79,6 +81,8 @@ def parse_inset(parser, outfile):
         # TODO actually handle foot, this is here just for the demo
         parser.advance()
         main.parse_multiple_text_layouts(parser, outfile)
+    elif parser.current_parameters()[0] == "ERT":  # Evil red text, AKA latex code
+        parse_ert(parser, outfile)
     else:
         print(f"Unknown inset {parser.current().__repr__()}, skipping.")
         while parser.current() != "\\end_inset\n":
@@ -87,6 +91,31 @@ def parse_inset(parser, outfile):
     assert parser.current_command() == "\\end_inset"
     parser.advance()
     return
+
+
+def parse_ert(parser, outfile):
+    # TODO properly parse ert contents
+    parser.advance()
+    assert parser.current_line == "status open\n"
+    parser.advance()
+
+    ert_text = ""
+    while parser.current_line != "\\end_inset\n":
+        ert_text += parser.current_line
+        parser.advance()
+
+    hyperlink_pattern = re.compile(r"\\backslash\n(hypertarget|hyperlink)\{(.*)\}\{(.*)\}\n")
+    hypers = re.findall(hyperlink_pattern, ert_text)
+    for hyper_type, link_name, text in hypers:
+        if hyper_type == "hypertarget":
+            outfile.write(f'<span id="{link_name.__repr__()[1:-1]}">{text}</span>')
+            hyperlink_targets[link_name] = f"{outfile.get_current_file_name()}#{link_name.__repr__()[1:-1]}"
+        else:
+            assert hyper_type == "hyperlink"
+            if link_name in hyperlink_targets:
+                outfile.write(f'<a href="{hyperlink_targets[link_name]}">{text}</a>')
+            else:
+                outfile.write(f'<a>{text}</a>')
 
 
 def parse_formula_macro(parser):
