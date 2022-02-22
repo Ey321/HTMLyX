@@ -26,7 +26,10 @@ def parse_file(infile_path, outfile_path):
     outfile.write("<html>\n")
     write_head(outfile)
     parser = Parser(infile_path)
+    parser.advance()
     while parser.next() != "\\begin_body\n":
+        if parser.current_command() == "\\language":
+            parser.default_language = parser.current_parameters()[0]
         parser.advance()
     parser.advance()
     parse_body(parser, outfile)

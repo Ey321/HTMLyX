@@ -1,4 +1,5 @@
 from typing import *
+DEFAULT_LANGUAGE = "english"
 
 
 class Parser:
@@ -7,6 +8,7 @@ class Parser:
         self.file_path = path_to_file
         self.current_line: Optional[str] = None
         self.next_line: Optional[str] = None
+        self.default_language = DEFAULT_LANGUAGE
         self.update_next()
         self.__line_idx = 0
 

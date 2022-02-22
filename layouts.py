@@ -101,6 +101,7 @@ VALID_COLORS = {
     "yellow"
 }
 
+RTL_LANGUAGES = {"arabic", "hebrew"}
 
 def parse_begin_layout(parser, outfile):
     """parses a layout, from \\begin layout to \\end_layout."""
@@ -212,6 +213,7 @@ def parse_list_item(parser, outfile, level=0):
 
 def parse_text(parser, outfile, indent=0):
     """parses a text and its styles"""
+    language = parser.default_language
 
     paragraph_styles = {
         "bar": "default",
@@ -232,7 +234,12 @@ def parse_text(parser, outfile, indent=0):
                 outfile.write(
                     f'</span><span style="{get_style(paragraph_styles)}">')
                 style_changed = False
-            outfile.write(parser.current()[:-1])
+            # The entire line without the newline
+            text = parser.current()[:-1]
+            if is_rtl(language):  # parentheses should be reversed in rtl languages
+                translation_table = str.maketrans("()", ")(")
+                text = text.translate(translation_table)
+            outfile.write(text)
             parser.advance()
         else:
             if parser.current_command() == "\\begin_inset":
@@ -242,6 +249,9 @@ def parse_text(parser, outfile, indent=0):
                 paragraph_styles[parser.current_command()[1:]] = param
                 parser.advance()
                 style_changed = True
+            elif parser.current_command() == "\\lang":
+                language = parser.current_parameters()[0]
+                parser.advance()
             else:
                 parser.advance()
     outfile.write('</span>')
@@ -264,7 +274,10 @@ def get_style(style_dict):
     if style_dict["strikeout"] == "on":
         out += 'text-decoration: line-through; '
 
-
     if style_dict["color"] in VALID_COLORS:
         out += f'color: {style_dict["color"]}; '
     return out
+
+
+def is_rtl(language):
+    return language in RTL_LANGUAGES

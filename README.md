@@ -6,7 +6,13 @@
 
 ## Motivation
 
-[LyX](https://www.lyx.org/) is an open-source document processor. Usually, it export document as `.tex` file which are then compiled to `.pdf` using some installation of TeX. However, the multiple TeX instances of different operating systems make it difficult to compile files on different computers.
+[LyX](https://www.lyx.org/) is an open-source document processor. Usually, it export document as `.tex` file which are
+then compiled to `.pdf` using some installation of TeX. However, the multiple TeX instances of different operating
+systems make it difficult to compile files on different computers.
+
+Moreover, the `.pdf` documents generated are not easily viewed on mobile devices with small screens.
+Attempts have been made to compile both LyX and LaTeX documents into html code, but such attempts are lacking in terms
+of _Right-to-Left support_ and _support of math equations_. This project claim to provide adequate support for both.
 
 ## Usage
 
@@ -107,7 +113,7 @@ optional arguments:
 
 - [x] Floating figures, algorithms and tables
 
-- [ ] Table of contents, table of algorithms
+- [ ] Table of contents, table oparenthesis for RTLf algorithms
 
 - [ ] Bibliography
 
@@ -125,4 +131,5 @@ optional arguments:
 
 ## License
 
-**HTMLyX** is released under the GNU GPL version 3.0. The license can be found in `LICENSE`, but if for some reason it wasn't included with the code, you can find it [here](https://www.gnu.org/licenses/gpl-3.0.txt).
+**HTMLyX** is released under the GNU GPL version 3.0. The license can be found in `LICENSE`, but if for some reason it
+wasn't included with the code, you can find it [here](https://www.gnu.org/licenses/gpl-3.0.txt).
