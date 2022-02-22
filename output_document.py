@@ -10,7 +10,7 @@ class OutputDocument:
     def __init__(self, outfile_path):
         self.directory = outfile_path
         self.current_pt = 0
-        self.file_path = pathlib.Path(self.directory) / f"pt{self.current_pt}"
+        self.file_path = pathlib.Path(self.directory) / f"pt{self.current_pt}.html"
         self.file = open(self.file_path, "w")
         self.counter = Counter()
         self.current_body = NORMAL_BODY
@@ -24,7 +24,7 @@ class OutputDocument:
         self.write("<html>\n")
         self.write("<head>\n")
         self.write('<meta http-equiv="Content-type" '
-                      'content="text/html;charset=UTF-8"/>\n')
+                   'content="text/html;charset=UTF-8"/>\n')
         self.write(
             """
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css" integrity="sha384-MlJdn/WNKDGXveldHDdyRP1R4CTHr3FeuDNfhsLPYrq2t0UBkUdK2jyTnXPEK1NQ" crossorigin="anonymous">
@@ -56,7 +56,7 @@ class OutputDocument:
     def new_file(self):
         self.close()
         self.current_pt += 1
-        self.file_path = pathlib.Path(self.directory) / f"pt{self.current_pt}"
+        self.file_path = pathlib.Path(self.directory) / f"pt{self.current_pt}.html"
         self.file = open(self.file_path, "w")
         self.write_beginning()
 
@@ -69,4 +69,3 @@ class OutputDocument:
     def close(self):
         self.write_end()
         self.file.close()
-
